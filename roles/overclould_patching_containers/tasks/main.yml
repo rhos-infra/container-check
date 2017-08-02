@@ -1,0 +1,21 @@
+- name: copy repo file from undercloud machine to overcloud nodes
+  synchronize: src=/etc/yum.repos.d/patched_rpms.repo dest=/etc/yum.repos.d/patched_rpms.repo
+  delegate_to: undercloud
+  
+- name: copy rpm files from undercloud machine to overcloud nodes
+  synchronize: src=/patched_rpms dest=/patched_rpms
+  delegate_to: undercloud
+
+- name: download docker.yml
+  get_url:
+    url: https://review.openstack.org/gitweb?p=openstack/tripleo-heat-templates.git;a=blob_plain;f=environments/docker.yaml;hb=caedf06f3642218e51cc903d966e32d0fb415360
+    dest: /tmp/container-check/docker.yml
+    mode: 0440
+
+- name: run container update
+  shell: python container-check.py --containers docker.yml --update
+  args: 
+    chdir: ../container-check
+
+
+
