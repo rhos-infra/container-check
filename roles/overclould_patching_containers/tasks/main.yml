@@ -1,21 +1,28 @@
-- name: copy repo file from undercloud machine to overcloud nodes
-  synchronize: src=/etc/yum.repos.d/patched_rpms.repo dest=/etc/yum.repos.d/patched_rpms.repo
-  delegate_to: undercloud
+# no copy is needed if not run as a standalone
+# vi plugins/tripleo-undercloud/tasks/images/repos.yml +18
+#- name: copy repo file from undercloud machine to overcloud nodes
+#  synchronize: src=/etc/yum.repos.d/patched_rpms.repo dest=/etc/yum.repos.d/patched_rpms.repo
+#  delegate_to: undercloud-0
   
-- name: copy rpm files from undercloud machine to overcloud nodes
-  synchronize: src=/patched_rpms dest=/patched_rpms
-  delegate_to: undercloud
+#- name: copy rpm files from undercloud machine to overcloud nodes
+#  synchronize: src=/patched_rpms dest=/patched_rpms
+#  delegate_to: undercloud-0
+- name: Copy container-check.py script to overcloud
+  copy:
+      src: "{{ role_path }}/../../container-check.py"
+      dest: /tmp/container-check.py
+      mode: 0755
+      force: yes
 
-- name: download docker.yml
-  get_url:
-    url: https://review.openstack.org/gitweb?p=openstack/tripleo-heat-templates.git;a=blob_plain;f=environments/docker.yaml;hb=caedf06f3642218e51cc903d966e32d0fb415360
-    dest: /tmp/container-check/docker.yml
-    mode: 0440
+- name: Copy docker-images.yaml to overcloud
+  copy:
+      src: '/tmp/docker-images.yaml'
+      dest: /tmp/docker-images.yaml
+      mode: 0755
+      force: yes
 
 - name: run container update
-  shell: python container-check.py --containers docker.yml --update
-  args: 
-    chdir: ../container-check
+  shell: python /tmp/container-check.py --containers /tmp/docker-images.yaml --update
 
-
-
+- name: Restart component services
+  shell: systemctl restart openstack-{{ install.component.name }}\*

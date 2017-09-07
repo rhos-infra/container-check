@@ -20,3 +20,7 @@ subparsers:
                       type: Value
                       help: 'Private SSH key for the user <username>'
                       required: False
+                  component-name:
+                      type: Value
+                      help: 'name of the component (cinder, neutron, nova, etc)'
+                      required: True

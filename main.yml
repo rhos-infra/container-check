@@ -11,9 +11,19 @@
           ansible_ssh_private_key_file: "{{ install.host.key_file }}"
        when: (install.host is defined) and (install.host.ip is defined) and (install.host.username is defined) and (install.host.key_file is defined)
 
+
+- name: Copy docker-images.yaml from undercloud 
+  hosts: undercloud
+  become: yes
+  tasks:
+    - fetch:
+          src: '/home/stack/virt/docker-images.yaml'
+          dest: /tmp/docker-images.yaml
+          mode: 0755
+          flat: yes
+
 - name: Copy patched rpms from the undercloud node and run the update
   hosts: overcloud_nodes
   become: yes
   roles:
     - { role: overclould_patching_containers }
-
