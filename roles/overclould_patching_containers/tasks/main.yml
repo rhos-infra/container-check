@@ -21,8 +21,11 @@
       mode: 0755
       force: yes
 
+- name: leave only component related lines (capitalize the first character)
+  shell: grep -E '{{install.component.name | capitalize}}|parameter_defaults' /tmp/docker-images.yaml  > /tmp/docker-images-filtered.yaml
+
 - name: run container update
-  shell: python /tmp/container-check.py --containers /tmp/docker-images.yaml --update
+  shell: python /tmp/container-check.py --containers /tmp/docker-imagesi-filtered.yaml --update
 
 - name: Restart component services
   shell: systemctl restart openstack-{{ install.component.name }}\*
